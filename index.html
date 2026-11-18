@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Arise</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-asm-memory-growth.js"></script>
+<style>
+:root{
+  --bg:#070b17; --bg2:#0d1428; --panel:#111a33; --tile:#17224422; --tile-solid:#162040;
+  --line:#26335a; --text:#f4f7ff; --muted:#9db0d6; --accent:#46f0dc; --accent-ink:#04201c;
+  --accent-soft:#46f0dc22; --hot:#ff4f78; --mark:#ffd84a; --mark-ink:#241c00;
+  --shadow:0 10px 30px rgba(0,0,0,.35);
+}
+:root[data-theme="light"]{
+  --bg:#f1f5fb; --bg2:#e6edf8; --panel:#ffffff; --tile:#f2f6fc; --tile-solid:#f2f6fc;
+  --line:#d3ddee; --text:#0c1530; --muted:#4f5f84; --accent:#00857a; --accent-ink:#ffffff;
+  --accent-soft:#00857a1a; --hot:#e0305a; --mark:#ffe27a; --mark-ink:#2a2000;
+  --shadow:0 8px 24px rgba(20,40,90,.10);
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg:#f1f5fb; --bg2:#e6edf8; --panel:#ffffff; --tile:#f2f6fc; --tile-solid:#f2f6fc;
+    --line:#d3ddee; --text:#0c1530; --muted:#4f5f84; --accent:#00857a; --accent-ink:#ffffff;
+    --accent-soft:#00857a1a; --hot:#e0305a; --mark:#ffe27a; --mark-ink:#2a2000;
+    --shadow:0 8px 24px rgba(20,40,90,.10);
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{height:100%;-webkit-text-size-adjust:100%}
+body{
+  margin:0;min-height:100%;color:var(--text);
+  font-family:"Vazirmatn","Noto Naskh Arabic",system-ui,sans-serif;font-size:17px;line-height:1.65;
+  background:radial-gradient(1200px 500px at 85% -10%, var(--accent-soft), transparent 60%), var(--bg);
+  background-attachment:fixed;
+  padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0);
+}
+.wrap{max-width:720px;margin:0 auto;padding:0 16px 40px}
+
+/* header */
+header{display:flex;align-items:center;justify-content:space-between;padding:18px 0 10px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{
+  width:44px;height:44px;border-radius:14px;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--accent),#3a8bff);color:var(--accent-ink);
+  font-weight:800;font-size:1.35rem;box-shadow:0 6px 18px var(--accent-soft);
+}
+.brand h1{margin:0;font-size:1.5rem;font-weight:800;letter-spacing:.06em;line-height:1.1}
+.brand small{display:block;color:var(--muted);font-size:.8rem;font-weight:400;letter-spacing:0;margin-top:2px;max-width:46vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.icon-btn{
+  background:var(--panel);border:1px solid var(--line);color:var(--text);
+  width:44px;height:44px;border-radius:14px;font-size:1.15rem;cursor:pointer;
+}
+
+/* upload */
+.drop{
+  display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;
+  margin-top:28px;padding:44px 20px;border:2px dashed var(--line);border-radius:24px;
+  background:var(--panel);cursor:pointer;box-shadow:var(--shadow);transition:border-color .15s, transform .15s;
+}
+.drop:hover,.drop.over{border-color:var(--accent)}
+.drop:active{transform:scale(.99)}
+.drop .big{
+  width:68px;height:68px;border-radius:20px;display:grid;place-items:center;font-size:2rem;
+  background:var(--accent-soft);color:var(--accent);margin-bottom:6px;
+}
+.drop b{font-size:1.25rem;font-weight:700}
+.drop span{color:var(--muted);font-size:.92rem;max-width:30ch}
+input[type=file]{display:none}
+
+/* search */
+.search{display:none;position:sticky;top:0;z-index:10;padding:10px 0 12px;
+  background:linear-gradient(var(--bg) 78%, transparent)}
+.search.on{display:block}
+.row{display:flex;gap:10px}
+.field{
+  flex:1;min-width:0;background:var(--panel);border:2px solid var(--line);color:var(--text);
+  border-radius:16px;padding:14px 16px;font:inherit;font-size:1.1rem;font-weight:500;outline:none;
+  box-shadow:var(--shadow);
+}
+.field::placeholder{color:var(--muted);font-weight:400}
+.field:focus{border-color:var(--accent)}
+.btn{
+  background:var(--hot);color:#fff;border:0;border-radius:16px;padding:0 22px;
+  font:inherit;font-weight:700;font-size:1.05rem;cursor:pointer;box-shadow:var(--shadow);
+}
+.btn:active{transform:scale(.96)}
+.tools{display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap}
+.sel{
+  background:var(--panel);border:1px solid var(--line);color:var(--text);
+  border-radius:12px;padding:8px 12px;font:inherit;font-size:.95rem;max-width:48%;
+}
+.sel:focus{outline:2px solid var(--accent)}
+.count{margin-inline-start:auto;color:var(--accent);font-weight:600;font-size:.95rem}
+
+/* cards */
+.card{
+  background:var(--panel);border:1px solid var(--line);border-radius:22px;
+  margin:14px 0;padding:18px;box-shadow:var(--shadow);position:relative;overflow:hidden;
+}
+.card::before{content:"";position:absolute;inset-block:0;inset-inline-start:0;width:5px;
+  background:linear-gradient(var(--accent),#3a8bff)}
+.top{display:flex;align-items:center;gap:14px}
+.avatar{
+  width:54px;height:54px;border-radius:18px;flex:none;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--accent),#3a8bff);color:var(--accent-ink);
+  font-weight:800;font-size:1.5rem;
+}
+.who{min-width:0;flex:1}
+.name{font-weight:800;font-size:1.35rem;line-height:1.4;overflow-wrap:anywhere}
+.chip{
+  display:inline-block;margin-top:4px;padding:2px 12px;border-radius:999px;
+  background:var(--accent-soft);color:var(--accent);font-weight:600;font-size:.9rem;
+}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.tile{background:var(--tile-solid);border:1px solid var(--line);border-radius:16px;padding:10px 14px;min-width:0}
+.tile .k{display:block;color:var(--muted);font-size:.82rem;font-weight:500}
+.tile .v{display:block;font-size:1.15rem;font-weight:700;overflow-wrap:anywhere;margin-top:2px}
+.tile .v.empty{color:var(--muted);font-weight:400}
+details.all{margin-top:14px;border-top:1px solid var(--line);padding-top:10px}
+details.all summary{cursor:pointer;color:var(--accent);font-size:.95rem;font-weight:600;padding:4px 0}
+.rw{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px dashed var(--line);font-size:.9rem}
+.rw .rk{color:var(--muted);flex:none;font-size:.9rem}
+.rw .rv{font-weight:600;overflow-wrap:anywhere;text-align:start;unicode-bidi:plaintext}
+.card{background:linear-gradient(180deg,color-mix(in srgb,var(--panel) 90%,var(--accent)),var(--panel));animation:rise .35s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.name{font-size:1.5rem}
+.avatar{box-shadow:0 8px 20px rgba(0,0,0,.3);color:#07101f;text-shadow:0 1px 0 rgba(255,255,255,.3)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chips .chip{margin-top:0;font-size:.92rem;padding:3px 12px}
+.chip.loc{background:color-mix(in srgb,var(--hot) 16%,transparent);color:var(--hot)}
+.tile{box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+.tile .k{display:flex;align-items:center;gap:6px}
+.tile .k i{font-style:normal;font-size:1rem}
+.field{font-size:1.15rem}
+body.nokey .wrap{display:none}
+body:not(.nokey) #keygate{display:none}
+body.nokey #gate{display:none}
+.kin{text-align:center;letter-spacing:.08em;font-weight:700;font-family:ui-monospace,Menlo,monospace}
+.kerr{min-height:1.5em;color:var(--hot);font-size:.92rem;font-weight:600}
+.shake{animation:shake .35s}
+@keyframes shake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.sec{margin:18px 2px 0;color:var(--muted);font-size:.85rem;font-weight:600}
+.grid+.grid{margin-top:10px}
+mark{background:var(--mark);color:var(--mark-ink);border-radius:6px;padding:0 3px}
+
+/* states */
+.state{text-align:center;color:var(--muted);padding:56px 12px}
+.state .ico{font-size:2.4rem;display:block;margin-bottom:8px}
+.state b{display:block;color:var(--text);font-size:1.15rem;margin-bottom:4px}
+.msg{display:none;padding:12px 14px;border-radius:14px;background:#ff4f7826;color:var(--hot);margin:14px 0;font-weight:500}
+.spin{width:22px;height:22px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:s .8s linear infinite;display:inline-block;vertical-align:middle}
+@keyframes s{to{transform:rotate(360deg)}}
+.more{display:block;margin:16px auto;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:14px;padding:12px 26px;font:inherit;font-weight:600;cursor:pointer}
+body.locked .wrap{display:none}
+.gate{display:none;align-items:flex-start;justify-content:center;padding:56px 16px 40px}
+body.locked .gate{display:flex}
+.gate-card{
+  width:100%;max-width:440px;text-align:center;display:flex;flex-direction:column;gap:12px;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--panel) 92%,var(--accent)) ,var(--panel));
+  border:1px solid var(--line);border-radius:32px;padding:30px 20px 24px;box-shadow:0 24px 60px rgba(0,0,0,.35);
+}
+.halo{width:96px;height:96px;margin:0 auto;border-radius:50%;display:grid;place-items:center;
+  background:radial-gradient(circle,var(--accent-soft),transparent 70%)}
+.gate-card .logo{width:68px;height:68px;border-radius:22px;font-size:2rem}
+.gate-card h2{margin:0;font-size:2rem;font-weight:800;letter-spacing:.1em}
+.lead{margin:0 6px 4px;color:var(--muted);font-size:1rem}
+.bar{display:flex;gap:8px;margin:6px 4px 0}
+.bar i{flex:1;height:6px;border-radius:99px;background:var(--line);transition:background .3s}
+.bar i.on{background:linear-gradient(90deg,var(--accent),#3a8bff)}
+.prog{color:var(--muted);font-size:.85rem;margin-bottom:4px}
+.prog span{color:var(--accent);font-weight:800}
+.join{
+  display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:20px;color:#fff;
+  text-decoration:none;text-align:start;position:relative;overflow:hidden;
+  box-shadow:0 10px 24px rgba(0,0,0,.25);transition:transform .15s, filter .15s;
+}
+.join:active{transform:scale(.98)}
+.join.tg{background:linear-gradient(135deg,#2aabee,#1c7fc4)}
+.join.dc{background:linear-gradient(135deg,#6b77ff,#4752c4)}
+.join .ic{width:48px;height:48px;border-radius:14px;background:rgba(255,255,255,.2);display:grid;place-items:center;flex:none}
+.join .tx{flex:1;min-width:0}
+.join .tx b{display:block;font-size:1.2rem;font-weight:800;letter-spacing:.02em}
+.join .tx small{display:block;opacity:.85;font-size:.85rem}
+.join .st{flex:none;position:relative;min-width:62px;height:34px;display:grid;place-items:center}
+.join .st em{font-style:normal;position:absolute;font-weight:700;transition:opacity .2s, transform .2s}
+.join .go{background:rgba(255,255,255,.22);padding:5px 14px;border-radius:999px;font-size:.95rem}
+.join .ok{opacity:0;transform:scale(.4);background:#fff;color:#0a8a43;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:1.05rem}
+.join.done{filter:saturate(.9)}
+.join.done .go{opacity:0}
+.join.done .ok{opacity:1;transform:scale(1)}
+.go-on{background:linear-gradient(135deg,var(--accent),#3a8bff);color:var(--accent-ink);padding:16px;margin-top:6px;font-size:1.15rem;border-radius:18px;font-weight:800;box-shadow:0 10px 26px var(--accent-soft)}
+.go-on:disabled{opacity:.35;cursor:not-allowed;box-shadow:none}
+.foot{color:var(--muted);font-size:.82rem}
+@media (max-width:360px){.grid{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body class="locked nokey">
+<noscript><p style="color:#fff;background:#b3123a;text-align:center;padding:16px;margin:0">JavaScript پێویستە. لە Safari یان Chrome بیکەرەوە.</p></noscript>
+<section class="gate" id="keygate">
+  <div class="gate-card">
+    <div class="halo"><div class="logo" dir="ltr">A</div></div>
+    <h2 dir="ltr">Arise</h2>
+    <p class="lead">بۆ چوونە ناو وێبسایتەکە، کلیلی (Key) خۆت بنووسە</p>
+    <input class="field kin" id="kin" dir="ltr" placeholder="ARISE-XXXX-XXXX-XXXX" autocomplete="off" autocapitalize="characters" spellcheck="false" enterkeyhint="go">
+    <div class="kerr" id="kerr" role="alert"></div>
+    <button class="btn go-on" id="kgo">پشکنین</button>
+    <small class="foot">کلیلت نییە؟ پەیوەندی بکە بە <a href="https://t.me/arisekrd" target="_blank" rel="noopener" style="color:var(--accent)">Telegram</a></small>
+  </div>
+</section>
+<section class="gate" id="gate">
+  <div class="gate-card">
+    <div class="halo"><div class="logo" dir="ltr">A</div></div>
+    <h2 dir="ltr">Arise</h2>
+    <p class="lead">بۆ کردنەوەی وێبسایتەکە، یەکەم جار ئەم دوو کەناڵە جۆین بکە</p>
+
+    <div class="bar" aria-hidden="true"><i id="b1"></i><i id="b2"></i></div>
+    <div class="prog"><span id="prog">0</span> / 2 جۆین کراوە</div>
+
+    <a class="join tg" id="j-tg" href="https://t.me/arisekrd" target="_blank" rel="noopener">
+      <span class="ic"><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="#fff" d="M21.8 3.3 2.6 10.7c-.9.4-.9 1.1 0 1.4l4.8 1.5 1.8 5.6c.2.6.4.8.8.8s.6-.2.9-.5l2.3-2.2 4.7 3.5c.9.5 1.5.2 1.8-.9L22.9 4.6c.3-1.3-.5-1.8-1.1-1.3ZM9.5 13.6l9-5.7c.4-.3.8-.1.5.2l-7.4 6.7-.3 3.5-1.8-4.7Z"/></svg></span>
+      <span class="tx"><b>Telegram</b><small>کەناڵی ئەرایز</small></span>
+      <span class="st"><em class="go">جۆین</em><em class="ok">✓</em></span>
+    </a>
+    <a class="join dc" id="j-dc" href="https://discord.gg/khf" target="_blank" rel="noopener">
+      <span class="ic"><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="#fff" d="M6 4c-2 .6-3.5 1.800-4 3.200C1.200 11 1 14.500 1.800 17.800 3 19 4.500 19.800 6.200 20.200l1-1.700c-.6-.2-1.200-.5-1.600-.9l.4-.3c3.100 1.400 6.300 1.400 9.400 0l.4.3c-.5.4-1 .7-1.600.9l1 1.700c1.700-.4 3.200-1.200 4.400-2.400C22.800 14.500 22.500 11 21.800 7.200 21.300 5.800 19.800 4.600 17.800 4l-.6 1.200c-1.700-.4-3.100-.4-4.800 0L11.800 4C9.800 3.900 7.800 3.900 6 4Z"/><circle cx="8.700" cy="12.200" r="1.700" fill="#5865f2"/><circle cx="15.300" cy="12.200" r="1.700" fill="#5865f2"/></svg></span>
+      <span class="tx"><b>Discord</b><small>سێرڤەری سایبەر دراگونز</small></span>
+      <span class="st"><em class="go">جۆین</em><em class="ok">✓</em></span>
+    </a>
+
+    <button class="btn go-on" id="cont" disabled>بەردەوام بە</button>
+    <small class="foot">دوای جۆینکردنی هەردووکیان بگەڕێوە و «بەردەوام بە» دابگرە</small>
+  </div>
+</section>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo" dir="ltr">A</div>
+      <div><h1 dir="ltr">Arise</h1><small id="status">فایلی db هەڵبژێرە</small></div>
+    </div>
+    <button class="icon-btn" id="theme" aria-label="گۆڕینی ڕووکار">◐</button>
+  </header>
+
+  <label class="drop" id="drop">
+    <div class="big">🗂</div>
+    <b>فایلی db هەڵبژێرە</b>
+    <span>.db یان .sqlite — تەنها لەسەر مۆبایلەکەت دەکرێتەوە و هیچ نانێردرێت</span>
+    <input type="file" id="file" accept=".db,.sqlite,.sqlite3,.db3,application/octet-stream,*/*">
+  </label>
+  <div class="msg" id="err"></div>
+
+  <div class="search" id="search">
+    <div class="row">
+      <input class="field" id="q" placeholder="ناو بنووسە... (یەک، دوو یان سێ بەش)" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search">
+      <button class="btn" id="go">گەڕان</button>
+    </div>
+    <div class="tools">
+      <select class="sel" id="tbl" aria-label="خشتە"></select>
+      <select class="sel" id="col" aria-label="گەڕان بەپێی"></select>
+      <span class="count" id="count"></span>
+    </div>
+  </div>
+
+  <div id="results"></div>
+</div>
+
+<script>
+/* ===== ئەو خانانەی پیشان دەدرێن (keys = ناوی ئەگەریی column لە db) ===== */
+const FIELDS = [
+  {id:'first',  label:'ناو',             keys:['p_first','first','p_name','name','fname']},
+  {id:'father', label:'ناوی باوک',       keys:['p_father','father']},
+  {id:'grand',  label:'ناوی باپیر',      keys:['p_grand','grand','grandfather']},
+  {id:'mother', label:'ناوی دایک',       keys:['p_mother','mother','mother_name']},
+  {id:'gmother',label:'ناوی باوکی دایک', keys:['gr_mother','p_gr_mother','grandmother']},
+  {id:'city',   label:'شار / ناوچە',      keys:['ss_br_nm','city','p_city','br_name','branch_name']},
+  {id:'seq',    label:'ڕیزی کەس',         keys:['seq_no']},
+  {id:'case',   label:'باری یاسایی',     keys:['p_case']},
+  {id:'job',    label:'کار',              keys:['p_job']},
+  {id:'gareak', label:'گەڕەک',            keys:['ss_pg_no']},
+  {id:'kolan',  label:'کۆڵان',            keys:['ss_lg_no']},
+  {id:'khanu',  label:'خانوو',            keys:['ss_id_no']},
+  {id:'birth',  label:'ساڵی لەدایکبوون', keys:['p_birth','birth','birth_year']},
+];
+const SEARCHABLE = ['first','father','grand','mother','gmother'];
+const PICKABLE = [...SEARCHABLE,'city'];
+const PAGE = 30;
+
+/* ===== ڕێکخستنی پیتەکان: ی/ي/ێ، ک/ك، ە/ه/ة، أ/إ/آ → ا، هتد ===== */
+const MAP = {};
+const add=(to,chars)=>{for(const c of chars) MAP[c]=to};
+add('ي','يىیێ'); add('ك','كک'); add('ه','هەةھ'); add('ا','اأإآٱ');
+add('و','وۆؤ'); add('ر','رڕ'); add('ل','لڵ'); add('ء','ئء');
+function normChar(c){
+  if(/[\u064B-\u065F\u0670\u0640\u200c\u200d]/.test(c)) return '';
+  return MAP[c] ?? c.toLowerCase();
+}
+function norm(s){return Array.from(String(s)).map(normChar).join('')}
+
+/* ===== پاککردنەوەی نووسین: بۆشایی و پیتی شاراوەی تەواوکەر (□) لادەبرێن ===== */
+function decode(v){
+  if(!(v instanceof Uint8Array)) return String(v);
+  for(const enc of ['utf-8','utf-16le','windows-1256']){
+    try{ return new TextDecoder(enc,{fatal:true}).decode(v) }catch(e){}
+  }
+  return Array.from(v).join(',');
+}
+function clean(v){
+  if(v==null) return '';
+  return decode(v)
+    .replace(/[\u200c\u200d]/g,'')
+    .replace(/[\p{Cc}\p{Cf}\p{Cn}\p{Co}\p{Cs}\p{Zs}\p{Zl}\p{Zp}\u115f\u1160\u3164\uffa0\ufffd]/gu,' ')
+    .replace(/\s+/g,' ').trim();
+}
+/* بۆ پشکنین: پیتە نادیارەکان وەک ‹U+XXXX› پیشان دەدات */
+function raw(v){
+  if(v==null) return 'NULL';
+  return Array.from(decode(v)).map(c=>{
+    const p=c.codePointAt(0);
+    return (/[\p{Cc}\p{Cf}\p{Cn}\p{Co}\p{Zs}]/u.test(c)||p===0x3164)
+      ? '‹U+'+p.toString(16).toUpperCase().padStart(4,'0')+'›' : c;
+  }).join('') || '(بەتاڵ)';
+}
+
+let SQL, db;
+const $ = id => document.getElementById(id);
+const state = {table:null, cols:[], map:{}, rows:[], shown:0, tokens:[], total:0};
+
+function err(m){const e=$('err');e.textContent=m||'';e.style.display=m?'block':'none'}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function qid(s){return '"'+String(s).replace(/"/g,'""')+'"'}
+
+Promise.resolve().then(()=>initSqlJs())
+  .then(m=>SQL=m).catch(()=>err('sql.js بارنەبوو. ئینتەرنێتەکەت بپشکنە و لاپەڕەکە نوێ بکەرەوە.'));
+
+async function openFile(f){
+  err('');
+  if(!f) return;
+  if(!SQL){err('چەند چرکەیەک چاوەڕێ بکە و دووبارە هەوڵبدەرەوە.');return}
+  $('results').innerHTML='<div class="state"><span class="spin"></span></div>';
+  try{
+    const buf = new Uint8Array(await f.arrayBuffer());
+    if(db) db.close();
+    db = new SQL.Database(buf);
+    db.create_function('nrm', v => v==null ? '' : norm(clean(v)));
+    const t = db.exec("SELECT name FROM sqlite_master WHERE type IN ('table','view') AND name NOT LIKE 'sqlite_%' ORDER BY name");
+    const names = t.length ? t[0].values.map(r=>r[0]) : [];
+    if(!names.length) throw new Error('هیچ خشتەیەک نەدۆزرایەوە');
+    $('tbl').innerHTML = names.map(n=>`<option>${esc(n)}</option>`).join('');
+    $('tbl').style.display = names.length>1 ? '' : 'none';
+    $('status').textContent = f.name;
+    $('drop').style.display='none';
+    $('search').classList.add('on');
+    const pref = names.find(n=>n.toLowerCase()==='person') || names[0];
+    $('tbl').value = pref;
+    pickTable(pref);
+    $('q').focus();
+  }catch(e){
+    $('results').innerHTML='';
+    err('فایلەکە نەکرایەوە: '+e.message);
+  }
+}
+
+function resolve(cols){
+  const low = cols.map(c=>c.toLowerCase()), map={};
+  FIELDS.forEach(f=>{
+    let i=-1; for(const k of f.keys){ i=low.indexOf(k); if(i>=0) break; }
+    map[f.id]= i>=0 ? cols[i] : null;
+  });
+  return map;
+}
+
+function pickTable(name){
+  state.table=name;
+  state.cols = db.exec(`PRAGMA table_info(${qid(name)})`)[0].values.map(r=>r[1]);
+  state.map = resolve(state.cols);
+  state.total = db.exec(`SELECT COUNT(*) FROM ${qid(name)}`)[0].values[0][0];
+  $('col').innerHTML = '<option value="">هەموو ناوەکان</option>'+
+    FIELDS.filter(f=>PICKABLE.includes(f.id)&&state.map[f.id])
+      .map(f=>`<option value="${f.id}">تەنها ${esc(f.label)}</option>`).join('');
+  search();
+}
+
+function search(){
+  if(!db||!state.table) return;
+  err('');
+  const tokens = norm($('q').value.trim()).split(/\s+/).filter(Boolean);
+  state.tokens = tokens;
+  const pick = $('col').value;
+  const ids = (pick?[pick]:SEARCHABLE).filter(id=>state.map[id]);
+  const used = FIELDS.filter(f=>state.map[f.id]);
+  $('count').textContent='';
+  $('results').innerHTML='';
+
+  if(!used.some(f=>SEARCHABLE.includes(f.id))){
+    $('results').innerHTML='<div class="state"><span class="ico">⚠️</span><b>خانەی ناو نەدۆزرایەوە</b>خشتەیەکی تر هەڵبژێرە.</div>';
+    return;
+  }
+  if(!tokens.length){
+    $('results').innerHTML=`<div class="state"><span class="ico">🔎</span><b>ناوێک بنووسە</b>${state.total.toLocaleString('en')} تۆمار لە فایلەکەدا هەیە.</div>`;
+    return;
+  }
+
+  let sql = `SELECT * FROM ${qid(state.table)}`, params=[];
+  sql += ' WHERE '+tokens.map(()=>'('+ids.map(id=>`nrm(${qid(state.map[id])}) LIKE ?`).join(' OR ')+')').join(' AND ');
+  tokens.forEach(t=>ids.forEach(()=>params.push('%'+t+'%')));
+  // ئەوانەی بە ڕیزبەندی ناو، باوک، باپیر دەگونجێن پێش دێن
+  const pos=['first','father','grand'].filter(id=>state.map[id]);
+  if(tokens.length>1 && !pick && pos.length){
+    const n=Math.min(tokens.length,pos.length);
+    sql += ' ORDER BY '+Array.from({length:n},(_,i)=>`(nrm(${qid(state.map[pos[i]])}) LIKE ?)`).join(' + ')+' DESC';
+    for(let i=0;i<n;i++) params.push('%'+tokens[i]+'%');
+  }
+  sql += ' LIMIT 500';
+
+  try{
+    const st = db.prepare(sql); st.bind(params);
+    const rows=[]; while(st.step()){
+      const r=st.getAsObject(), o={_raw:r};
+      used.forEach(f=>o[f.id]=clean(r[state.map[f.id]])); rows.push(o);
+    } st.free();
+    state.rows=rows; state.shown=0;
+    if(!rows.length){
+      $('results').innerHTML='<div class="state"><span class="ico">🤷</span><b>هیچ ئەنجامێک نەدۆزرایەوە</b>ناوەکە بە شێوەیەکی تر یان کورتتر بنووسە.</div>';
+      return;
+    }
+    $('count').textContent = rows.length.toLocaleString('en')+(rows.length===500?'+':'')+' ئەنجام';
+    more();
+  }catch(e){err('هەڵە لە گەڕان: '+e.message)}
+}
+
+/* ناوەکان لە ئەنجامدا هایلایت بکە، تەنانەت ئەگەر ی/ي جیاواز بنووسرابن */
+function hl(text){
+  const chars = Array.from(String(text));
+  const nm=[], idx=[];
+  chars.forEach((c,i)=>{const n=normChar(c); if(n){nm.push(n);idx.push(i)}});
+  const flat = nm.join(''), on = new Array(chars.length).fill(false);
+  state.tokens.forEach(t=>{
+    let p=flat.indexOf(t);
+    while(p>=0){ for(let k=p;k<p+t.length;k++) on[idx[k]]=true; p=flat.indexOf(t,p+1); }
+  });
+  let out='', open=false;
+  chars.forEach((c,i)=>{
+    if(on[i]&&!open){out+='<mark>';open=true}
+    if(!on[i]&&open){out+='</mark>';open=false}
+    out+=esc(c);
+  });
+  return out+(open?'</mark>':'');
+}
+
+function year(v){
+  if(v==null||v==='') return '';
+  const s=String(v).trim(), m=s.match(/^(\d{4})(0{2}|0{4})$/); // 198600 → 1986
+  const d=s.replace(/\D/g,'');
+  if(d.length===s.length && (d.length===6||d.length===8)){ // YYYYMM یان YYYYMMDD
+    const y=d.slice(0,4), mo=d.slice(4,6), da=d.slice(6,8);
+    return [y, mo!=='00'?mo:'', (mo!=='00'&&da&&da!=='00')?da:''].filter(Boolean).join('/');
+  }
+  return m? m[1] : s;
+}
+
+const ICONS={father:'👨',grand:'👴',mother:'👩',gmother:'👴',birth:'🎂',age:'⏳',case:'⚖️',job:'💼',city:'📍',gareak:'🏘',kolan:'🛣',khanu:'🏠'};
+function hue(str){let h=0;for(const c of str)h=(h*31+c.codePointAt(0))%360;return h}
+function birthYear(v){const m=String(v??'').match(/^\d{4}/);return m?+m[0]:0}
+function tile(id,label,v){
+  const e=v==null||v==='';
+  return `<div class="tile"><span class="k"><i>${ICONS[id]||''}</i>${label}</span><span class="v${e?' empty':''}">${e?'—':hl(v)}</span></div>`;
+}
+
+function card(r){
+  const nm=[r.first,r.father,r.grand].filter(v=>v!=null&&v!=='').join(' ');
+  const by=birthYear(r.birth);
+  const age=by?String(new Date().getFullYear()-by):'';
+  const h=hue(String(r.first||''));
+  const t=(id,label,v)=>id in r||id==='age'?tile(id,label,v!==undefined?v:r[id]):'';
+  const d=document.createElement('article');
+  d.className='card';
+  d.innerHTML=`<div class="top">
+      <div class="avatar" style="background:linear-gradient(135deg,hsl(${h} 80% 62%),hsl(${(h+55)%360} 85% 56%))">${esc(Array.from(String(r.first||'؟').trim())[0]||'؟')}</div>
+      <div class="who"><div class="name">${hl(nm||'—')}</div>
+        ${r.seq?`<div class="chips"><span class="chip">کەسی ${esc(r.seq)}ی خێزان</span></div>`:''}
+      </div>
+    </div>
+    <div class="grid">
+      ${t('father','ناوی باوک')}${t('grand','ناوی باپیر')}${t('mother','ناوی دایک')}${t('gmother','ناوی باوکی دایک')}
+    </div>
+    <div class="grid">
+      ${t('birth','لەدایکبوون',by||'')}${t('age','تەمەن',age)}${t('case','باری یاسایی')}${t('job','کار')}
+    </div>
+    <div class="sec">ناونیشان</div>
+    <div class="grid">
+      ${t('city','ناوچە')}${t('gareak','گەڕەک')}${t('kolan','کۆڵان')}${t('khanu','خانوو')}
+    </div>`;
+  return d;
+}
+
+function more(){
+  const old=document.querySelector('.more'); if(old) old.remove();
+  const next = state.rows.slice(state.shown, state.shown+PAGE);
+  next.forEach(r=>$('results').appendChild(card(r)));
+  state.shown += next.length;
+  if(state.shown<state.rows.length){
+    const b=document.createElement('button');
+    b.className='more'; b.textContent=`زیاتر پیشان بدە (${state.rows.length-state.shown})`;
+    b.onclick=more; $('results').appendChild(b);
+  }
+}
+
+/* ===== دەروازەی جۆینکردن ===== */
+/* ===== کلیل (Key) ===== */
+const KEY_SALT='arise-v1:';
+const KEY_HASHES=new Set(["3cded1ae905b8a18","8ea0d639e40bd4d1","25edd48d7a38ce33","a8cbb36eed08dfdb","c369f1051198c971","7948c55592a5ee04","e1ccfe9ef7f68d37","d6951fa7420d17bf","e0d6d7b0fcf1f721","7a88b7e64868fe59","69a1c88ab4efbe19","0b1d5a86523f31fa","6ddfb3423c7632c1","6e8d3ba4d10a2a51","458185503a9ade17","a3fffd8339a7ea86","7ccf4367ea8ca438","83e653d8b7d7274d","e5cc75f709530238","4da5ee32d07e76b4","967ab5137e70da32","a4cd959141d16db8","9210e9d8112fc5bc","2699f8319df510ce","c28441b8fe82eeb9","40b2e6579487f7d9","86c870bf93524f94","04d7037dcc735a6e","697717e63d2779e2","e418bedaa72867bf","056c2edc3657c31f","a8932e2b89db49e3","d11b3e8b325f7b4f","415147cf55c3b2c7","f359038bc99f7576","8a82c6ad7a44178b","9a4562c1d592ed8f","08f0bee136c94303","6ae24c85ab8c7653","105642b2f9eccc26","df8f1f2b75623d2d","b3b89415841c9d92","40e5601ee70e6134","4dfa89bc6b34101f","2e2bd37e8c76969a","1527c08cc21a9909","4c3a4f94e31dc7a7","ba07b9bb6daa50fe","22861018bebfbdc9","d15ae77c696d932a","aca7058204fafa2d","2a3921f2815cf384","aff15130f90f9f02","93e1dc46fc1cbfe5","6df9f3ae40e5c8ad","2f973e3552761fbf","d0d72412cb6b916f","6c7361baa8bc78a8","65ad408f79820467","c0075a37d3002342","659423e3464d8d50","f0f631e8b139c184","2a6291b1009fe619","ec3de52d81ac30a4","5863cf71aa9dd48b","ee4ee7996b250673","861e51f7d5e7ef89","88c98196d2822c18","e0700745b2ff1dfe","d7937b87ca628b73","245a4c81f133bfab","8e41bef5253a7b25","c18eba428b8c926a","fcffdc410352a012","70f24fb808716fc8","d71c1eadd9796dc9","685339d30df672f4","ecb6cd83207db622","f520eeaf57bb17fe","69aa53c49d4ea70f","464a1f1e1e11220a","0f26c68b6e7486a2","ae102843cf8aea4f","641603d4166ab3c3","7f7caed10c4b493e","9d3a4f3503385114","05e9d65e771589eb","8a3db09be7404cda","30971d4a3875950e","ab01b270c228e2cd","e9b44ddf7c1924db","95b53e970a37bf2e","14eaef5b7af2046c","2507d9b59186ebb9","aa541ce4adf09409","ef759a2052d01951","03ab90549c424b7f","801471c496db937d","20f59246b6e801e5","428940cedaa76d91","3733798f37dad9b1","ae3dd08a95f02299","1bfb21238e1c5eec","c54def4e1e907101","30f2fc26df4e4356","8a1849f4d724f2f3","6d52312a5198c2c4","8a7fb00a61f839fe","935edc78b6a205a8","7d63600416871e0d","69f95f960c4a4599","15b3df7c58ae8244","8a80382ceedf29bc","b4aea594d9f8a274","fb072eab6157bf3b","2ab9d8f69b23a7ec","7f6c209fdff6b774","25fab37d6ec507f8","03db3eea462551b9","8cd5d8f5d18fcb04","5cbdb317b0898d6c","885882340da9a74a","102a3f19a5778906","f9a7db12b937e7fb","66e866a5352ab7c7","18bca5031ccbb446","0e4b108fe7e1c7d7","c39e2ea3f79df855","a824cac652df010a","1455b77d6a093bdd","1adbeff92aac4619","4422d7ce1f0715be","34db811e431dcfab","cc64174ea2f14ca2","3ba0f832d9973e98","c61a130e80774164","197f7768aa79e27b","f39e7c2df3d410b5","bf2dce915bd0781b","19b0d6a157be0a09","f066df606202f855","e01d2a8ec2321e25","1cce52d2653ee60b","fd0e21790938819c","2d636d857345ca4e","8552961c05ac1a21","5128c687021e3395","46c89bbde2cef137","541b488d3109f47e","9fc8d86970b8f312","f880b6c1c3061f56","a995c34efe58f093","0eec9832d3c6f413","6bb558aa1e52e02d","67e560b37bd2686f","18d9b3cf61f3a0b2","eed313d8d091056a","bbeb1a5e4e52e862","41c73749d631b88d","2e82e8476950b208","5908f2338d067b10","b3c02755b9313662","b90ec8c4a8c299e8","56f65f0529500e5a","e9970ccab55e8b39","0e5c6a72c6995e3d","de6457471e73df7a","0b6785898c7d0eb1","7d28123810e151ce","539669f794fc6898","27ad87eb6d80b9c3","8b1676b024635278","9bc96e6fb18353ae","9ce7fb406f590279","16c14ed56e6ba5bc","2e85044985714d8b","0710b722a2e27dcc","b022f4a1c847c5ad","7d34821d9cfc1431","f7707ff327de8e9b","27eba209c3416834","9cbf89ab21fcaf14","00f9ad909fe05b81","8c1ffd0f41d8999e","951befd278ca4c4b","89094bbb29c31620","803f7a4b8c1bb637","6d10615ccc4d2e5d","78162e6485c44914","1bbd71882cbf633b","f467d064cf88fb99","2facdc9ecb9665fd","67b99f1dee0124a1","0cc9b5b75ca69da0","5f46b6cc4fdcd704","fd40f4aca7ae509b","edfb6788635a8ddf","33c8da2c558af04b","b7dd838a7df2552c","c62dfdccbbe40cc2","545526e86db81e6b","26d9d78f0957bbf5","8607598e083a856f","d8fc69303ecc93f0","d2a5e9b05b19c8cf","c95300f2c2f3252d","a5f6d4654e532269","9955a8ba41a3b507","56d3e9978806335f","2fffc7cc0cbb0bf0","87e6cf200631182a","1b1bd57450fef2f7","da167bf3b667a4f2","911ee8981948a244","0ed804b33a08645c","e4b427c98ad60592","2280f64cbe187fc8","e9e0a763a0805ee5","811e93b2d4b605df","10a1ee5c8852648b","ccef64e06cffa6fb","da7a3f6138348a8f","9eababda54e7f12a","040280456c8c2de4","d2320bcaf0f7b3de","7d5b24c9cff14079","acf72ee0422d5c7a","84fa382fd67f22fe","55799e93237a2867","e61910beab221ebc","046872204391f265","65440615af231785","859dd5b6dedf2615","c4a0cd92f9aa1296","591a4b369dccfbd3","f878eaa82afdd203","22049059fbaccc0d","060128d45dc8e9f7","a6f873c93d2a04e4","9cddc008105407bc","58b29ca32c84b408","ff620c08efc89ff7","d3b4643ed4f98792","87d32158bbc906a0","a4eea85cef174ea5","1b5e693b3e4d8373","db59852a57732e77","75f45e9c27628ac1","b1579c6018db4c7a","e540eedc66b82afa","845e034a7908a44a","f876c771c364ae49","c68770e77c8e1c26","7ecdf47fbeaf0e8e","7967be4b38585ca9","a7fe5b7f1873892f","9c76b663ff932d4e","b83bdd232878dc3f","ba07c1c9f3229a79","a422a416ba0e2839","05f3a239520b4d5b","1785a4a5e0835c0f","c0a4eeec31c3541b","527ca3b414a58611","882b139981e392c9","e4813ecb64b37afd","97221ab2ae81e2ee","2996878b23609e59","41b2781fcf8d95d2","4acd7b8db4163d6f","c0cb0fc261d619f0","333be80571a8972d","38a50e6a810e692c","b4a7fb557b40988b","3fc7fd56dc16ac1e","aa8af7655ca4d155","5aaa9e8f6ca01bcc","5b25d94bdd9566b8","200cdede3db2e68e","61289d7c6969f5e5","12eab637aec5f9c1","b053afada77f1c0e","ae303390d40d2722","e2834a474964f27d","2dd4466388f93811","35d5f2672d2e5b9b","132ab1f55dd6c540","7a97afeddbc6def4","e63be4829a6ed511","d599b5913dafa767","e57747ed65aedf22","98c03fba71730f54","f526d7c22d4bd58c","eb45bf027e4ab12e","a9512c64c86160fb","90bc7fd62c982848","2166d9b99062dabc","1ba6ab654553196a","3701b9f37f1e4051","93d79e11afffa889","c7fe57315184c228","3ae620a328229564","7cf185f4aa8f453e","10e43a5e9daa87ee","1673614554b8df56","c9cda190cc3cb9b4","35cab0227b560db9","34d0d660ae4a25e1","3dbdeb570f4fb02e","faff499600298601","f5af7e3519578acb","722a1df7b47a9f83","a73a95d0544bbb88","f83ded0925cc9e35","31f8791f6c1ed484","cde445456ffd7593","48e97a45b5178f40","c85972482ec35f84","49d96c6addfbb7c5","4331724ac66ac946","6e2eed1273d1bb50","624401454d76fec4","decf20121ea292eb","e4d8f6365d7f24ba","e20d78f337539428","528b1cae84c64f05","ca14e98483942e98","b2b2943563e1da66","4952f20e14158c34","b997d0416d7c03da","cbda08a7c8c8569b","19b3453ace135188","adb6a3b14bd49c88","dfb11d435cedf6ce","32bcb1eaee7c4582","b4fb19789ede95b1","c3fb32541b033d16","40e7ff293fcff440","60c092933a18a8f1","a092a629a64d2894","1e177e9f869f3875","2c7bca6eb5e16db8","1941cf9ed91c2d7f","79822a5aabec3048","7a713e8c77057db7","b5afdd6cccfbbcbb","70c0c2aeb7f1c2db","5f90933e3c128fc1","0002dd7a1efecb5f","050b203de5b19788","d3115351af21dee3","e1d5f637f40ddfc2","b69c7134a0186366","2dd78f26de31d600","f7e22149500b396b","fe8466d737e16485","44c99bb5f64ef9ab","7387ab1f39253813","a83a14b2533d7775","b513af0a11b70665","bf2cdb708fb9e356","4f3274b119f608bc","e46d4e91e474c12c","b576fb9559527b05","77577fad0c647724","e1bb1b8fc5493023","10e7978eeb95b391","2de8422667b37964","192eec3754b9d60f","60d068e2d4dce1f1","25162140aa20f6d6","060e7c0c067e2c96","26695999e795cfd6","00049a5a919d05b3","0910430d0274ea3d","296fb05956b88b95","6bbb3526952a8936","c1845f88f46b6ba3","056611026cec24ae","c0accaeddb3039c6","943d3c1c4635d900","69b94137fe3485ba","637324d6363e34c6","1bd9e0dd6e9b75fa","5cf7742abca835b0","75a43ba15227c429","614c2d543d49f2fa","10b21dae83be0e71","573843576670558e","d8a0a05ed3090e7e","7722bc4b80750ca5","9dfce993e78d2552","d32859bd4c1c5a1e","a20fc07222152878","319b878224f19c74","9ede95aab0fd0af0","5b932c79fa60b9d5","60810c451edb1c71","18111f0ce75fce9c","436e88a0e403a90f","1925b36a935db5b2","0679f6ed704595f9","ea98b0d4744c7d14","73ea1e05e2c0ced4","d17fdccb7dc6c6fb","03a565de1e923c50","b792636b49aefce5","15af329b65f9b766","90cb5a1017bb0af4","0bf88b2bff89c88f","1b97750600dcb29a","47f549518019e824","d5db45a8f6830e42","3b423a22ec5d0c74","77d285d262bdbea2","62d5bde4f4fed6f0","9bbf1149fbaec22d","8e1dedc6b1eb4c37","4d67d19fd25e43d5","64fda4090e1478b5","6853fd5e14aabe37","189981febd11c684","00a3956ca7a93162","0fafcea535924d3c","4c186bb63a1c1668","68fd1ece9aa7dff7","5b1b87ec664cc5a7","f4c4cd00c8f48845","c52875e1bcb1d93a","dca3970a9468401a","04bcc56a57ef13bf","b1ed348fbff7a849","e69e246c1325b3b4","afd1a3143f68e7de","ad14d8b2fcdd139d","b9a43e85e1f519e6","979c71166e2f1f17","b0ac9ea9de2e328f","288bfea37f424719","12ab63f5960be82f","76484ade07d022bb","69b1db3b14cded67","848e0af2955b8b16","bf3da4ad83fe6b9b","da8dcd821227f1d1","32979019e9fb871f","c19bb54e2b06567e","86deda2f4de4f7a5","4b739bf30f7d7137","f4537ab24242fe4e","e45d1c4136897e76","c77bd2dad5134ba3","ea465af50a85c994","7c45518742f91ef1","ce9024a91fd63bd0","6ebba0d52c6879fb","62c225b090308565","762d4c7ca9498788","7f04732f0239ca6d","1eb3d3a13b0cd122","75b8b82c989a3438","8ee951c70be1179c","2a16398946b18e66","04b717a626029307","1f521d34fbde57b2","77df8df06bd607cd","a9276cb6bb1b2cdb","d106ad8d471e8c5b","5646c1bd87f1eb7b","ff7b5f27381ed6a4","e84390a0634f3a97","9eafa4c67f99e92a","31066bbcb38b4f0c","830f3f9e64388310","06a19057404abecb","8a536f0467d19241","9dad956732dc488b","104623999d1c25b9","93fb250b1e017e9a","421f6833a5d582d9","8dce16b3228ea745","2fa7ab06505dc8af","7cc87f21d9b885d9","55e6aeb62c1a3b87","ac9c42f561cd2b10","7275035c679c28f7","40e3ff8e93653ad0","6740b154d7137ba3","c475e4e990c126d0","7f9d3692fc56fa74","fec4f98a0506b683","e915aaafecb9e36c","0efb73ffc64019ff","ac166345c3bb3c8e","a52d7d78d32a0136","49750272e45fa86d","4a13ca3ad4160126","e7cb87e11f8830a5","08aa10dd975ccc16","962c71a3bb9bedd7","7273a8a78811c467","b054238d48375a8a","f35f39ea0c31f58d","8fd0510b4925c526","47886a99f16dfe22","b9affe513bbee5fc","2a1c56d464dc09b3","2c37d9de9bf7d224","de195a85a92fc153","bdd8f7c50b4c6530","a6884eed7ec914bf","6c68ef8451940195","4f2eb50a25aeaf4d","ddee5ac89c4115ab","5673caff214d58ff","b40835fba6aa4d63","03f01ebcbad6034f","a69919ea2d3a73ff","952dfc6b710bef4c","a5e6585933afee56","7eb7868d36e944a6","b397d0c03b14467a","9f963e2639a9bf82","1bfaf91afd654365","af12a71f8890fc32","78587519bd3cc35e","d75e97fbee30330e","ac87e6012b3126b7","0475df0cdbf49582","0103d518df03eac9","da844ee738ef83a6","dcf41f91fa1be64c","cdc26cfadba7b9f4","b4b43700fffd504c","f0992129b4d95baa","7d62fc31d7028c10","b7298688c5a332c2","ac687211e4c0d5bc","aa7fd249c9c57610","551e306be42f774f","c6e08d746d237571","2ef19996a33715d4","572cdf7cfc856fb3","4adce33ca74e9d5f","29d5bb9e978cf207","6e1c127c83d23ae7","13ea4c135b33c712","fe5a86f9e93c5683","8992882014e8832a","2d2943a5b666f3e2","54dc1b997639a31b","93dc2cae51ad170a","6a89115847c87422","24e65b591fabf637","9fc1a798261717c5","8c6d082d953b8881","d82d6153bb6ede4b","23bd18f1eb9eab63","5b2c969b4c565d61","b5fd21a496b406f0","cd4c9443e192388f","3106b04b518efa96","8670450c6b5fa341","a3cd150cc1dbf3dd","b1b8b7dee44b27c5","751ee2e47019c373","c16dab154aef6c11","05184b88fc75903b","57492fdecd932a2f","6028cc3c90a9f6aa","7de6268e7f15714c","4bc91b3d0bac88af","b2254cce21153d6b","d71b6b6c35c5c1da","fa54921aa85044aa","68ec52509ee8271b","3924a3ddd87805e9","8a0e913f317a8968","bb0ab36d6b293fe9","614138e150acd1b7","569b0889a19ee32d","3e1bff23c2b59ca5","60cbb0be807cf223","9b634fd8286cebd0","85bd2c77865b7453","6e8a7f7401fd79f0","4b05ebe78533afb1","e73a6b78de288796","b235065d6063609e","7c2bcdc56f86bb21","09c0fe5aed357d10","aa52a7d3bd679613","0b0a28994a8297ac","a5f5b4c256c5ebd0","d6687f1ca0e53d51","bdf70b3a287e4daa","409fbacc1fb9f3ec","57d9bf7f0be9ec59","24f3a2bde219777e","1ae856dfff70e152","5c68a1edfe2fced5","fd1447d718c3f187","f6809304ee9777e7","863b722610978e4b","0dce2b901d8deed6","7c673f46aacae67c","2415cefca8a77c59","2fecbc57eca0e014","c404c99feab9c1a2","89972e6e13fd8b79","68103b14b44c9fef","6f05c990d9852a7e","a0256fb854995139","97fd7f7504bf1094","fcab0b014a69f698","9b6be319cacb0e7b","3b3a52acdf715130","0c79ec6e6f4ea87c","4c33864ab014dbfb","4b0457aa8a762d15","85cb424cef5b7def","18ff8917c814bb6b","a5e6f79c078d190d","d68a78eea8edcf02","7ad3c0eec59ed0c9","1ee408b866ede2ce","2c4b9584de1bdbdb","5e3b137d68f0636f","b8f922e15b174a20","0fea53e05ef859d0","bc2f303d2081c3d8","a26cf1d256fd8a57","e5649569b0244b91","b88d20e5744a057b","fb82e3164560c094","6776617afde34d08","9b15c2a6301a0b22","63512e0282392eee","211fb1be7736318b","34e2c32a46dfc5f6","c90aa0eb5375847f","ad5d2036d6cab2ff","a6625fcc6c4f5b68","b7f357ce8068e4bb","d097eb4931427717","76d5e555fd444937","36509356544a76a2","af714a049287bb2f","5b8b5b7fecbcee2c","5cffff4a50143c83","1b81decf140bae49","53ac6d7a5ca5d885","a5e8e324d82d0257","437b05dd887f4fcd","0a584fecf652a877","072f74a97dc589a7","75040c674b9f6920","afac9915fb717093","fbd093a8b9b43181","5ee035a2dfada938","340cca28cd968deb","14ffb0d9b50cd54e","9e4d69a78ab76ae5","9ea11767c8f1b149","f641de8e393b2782","451fdb31215e9253","152a9dfa134658d0","ecef3fa1ae4e547a","b05b718e127651f2","dc6101ab60abac07","bf748c27aca54c31","3b9adb934017162a","05168324b0561eb6","5c2708a3e4fe5044","0feb34b06f4515c7","191f8272f50b63ed","66bc22c16ab1fe81","6e7fa795d2a5d83f","fa24ec753b5aac48","6419754b4de1a7d3","54059d144d213df7","88c672d584ce9f7b","d10fafa921512f27","558970be258cbdd8","f4bc0f46dd1c2c00","5d12e384537b25c2","fe5ed78bae558c29","a9aea43708390a30","cc748b0f881fc809","b9fedede1ddbda37","c4650de642733427","f0d1f76636719ee9","5a6da06523a05024","948e3e247c3c6977","b8ca2de13b9bb297","e56c11fea528fa48","9c2db738dc094f1b","965ea46e757302c3","22a0a484d0b500d9","b8331d63510c370a","715c7ce5603e6058","0aab773f3443532e","af4a83cc7b2df73c","ab2730ef328abd5a","90e167242a3d240c","d6616e7fc8b87a93","2a32587580e40e8b","e3a11cb4e3ee4a2a","4c1449cecd812f90","8a89ddf26f82f7ea","c7256607e51da884","c0fd1e391d3cd0e2","836e43bc4300128b","28cd3f623f6e74bf","ce93646383ccb5b0","a93aaf8614b8562f","e9298eec63808e9e","294c7938f56ed153","0b2ec944a196ceee","d11fbf7219587e49","94d59b144cf1074b","3d5db8b32e427470","480b1f5b620b676f","db052f676be8219e","741ab5cf4d6691f1","9521c0fbc496f4b0","0f687b5cc0bc7cc7","b698014edc052913","620005adb7a26f6d","7f57c5e2b7ba1bfa","2b142ab3eb425896","73e4e909a8add00a","86b3c12a9b3737aa","bbc03cb12866fc04","58023d8791adadff","3d07073b1eda6b63","a6cec8d33a89b2d1","8a2c2f50fe650add","55121c8680db0c03","d1ec1a8b0935d997","45a0998c18cf6e6d","92f44bb19efc5365","6f90fca8ba3b247e","aada996ed9ce3430","a6f7fe41bd66aaea","0ea9bfa4da0ec224","81a712af70aaa1fc","ea38791ec4473e6a","7a5719d10352de4c","30e1ff78f57df66a","e076888ba4baf193","9f164e6bb7486894","34cb54804eaa632b","40ede697a16b16dd","3831d650350c844f","5e4786b5f877b8c0","aa8bac2d79229dc9","02a9336529a387d4","3eb0b03683548a50","b7fdc33186c2e1f0","2352117b9b8c8acf","1e0c5d3cec957564","124dc7d015b17adf","bc680ac3597c45f1","7d5fc379ee47798a","29fa9c69c8b9bdb5","2122999c244e84c2","7573ab6fdc0eeef3","db19ab3486267290","160cc5aeca34778b","05ae1251caf1b60b","c4024f42c53f4064","f4c45a63c63161ef","bd30d33aa0ca8eb8","bdab592540034960","2f346de52d09317d","34abf00f4a00124c","bdd52c0bec3a1e48","02c092a552832bc8","b6f656dd496b62a5","23589cc52d8a5075","35aa842b5cf5f19d","86ba8530d8aa92ce","1c74deef2c2080d2","f15a8c2044a4fc79","f6da40fa53e67b49","e2d8334cd252f33c","9af694b427598a15","4181b44d5173698f","e519c3e797227779","343cf8098984ab67","fb729ebfa8784386","3938d8cc54622c21","0e4591a1088744cd","f4927ab52ca07d4f","d1136136f30bab3d","51bc5bdaf935ecf3","4db3772d697dd6f6","39e979b0d35e17a8","0d473aba419868c6","1d69eb9e983d4bb8","9f2fb8ad9032b8b5","cec2a39c3efa9f4c","c04da322c9e6f2e8","70c66d7d2c8904ee","ef5be22634d60914","6a61fdc6980f282f","3ac7d76960b5140f","3f7935e3f6b6a3a3","536519790d706717","ce2864d8a498da49","55f8b09cf33fd7d3","195a476f8ab26a79","e8764e52ac9f16d3","6e99da45eae8fdff","a50c2fa75ebbf9ce","72eda233157288e4","bc64a48f661098cd","7b44f3daae1b18ae","71ea71f80c940bee","b1d281023a832650","6fcfdf28b4f39150","f1d7ac44102bf4be","54a857d798ad910a","85bce8cec26d705c","7eb305c52b1772d0","fef5fd80aebf0e9f","ba4c1d37d3f33867","86249726ab9f160b","ab853995c7cd40c0","42e9622982931409","dba78c5c83a2c62c","708cabfc0a44c8a0","a553a97a37c31a21","33248d891085c9ff","445c7ef6cdb132d7","7c47971f2cf2ad12","4af08b2149ff643c","479c9418d4898f12","cbcdacc49b8370f7","2e753a78a0534cb3","7173c33062c6f9d6","a4e3d17f877107dc","79a2d0387581594f","5e941f780077f337","52a16070dd873d4d","1b045e72330dd405","b7189cf2520c52d9","3c2f3fd825db12a5","b84fa9b3faa91f9d","2e4ff9f7575cebac","032c36ee5de93c25","a8bfcc93d0af5364","51d69ea9381c7dd9","d0bd589c5f9e3903","03e8084638d3b30a","2d91710792d16be5","7d1292040b84aadb","981842c3eebabecc","28279f4e6b60eb3d","6a3fd30ee4b1f62e","deb8ddd13dfbbd85","f06a721b4195bccb","820704b49e557b4c","008bb0c2d3ddd682","6210ec515f3b85b2","4ea17402f5f891fc","fffee43a81fb24bd","262ff69f716ca039","17235dae9a40606e","c4791fd565308daa","81d54709581ba069","2bcc86ab71ce534c","621ffc5d7a68f24c","e3df5f8e4cb32c82","d3ad7e1974afcd06","833bf2e7e11f4260","6ea35ba2c4f4fedf","d60f4781085a7298","acfaaeabb0d1df23","904661226bbca96a","8d454408d3d7f130","b565d0b304444e72","a36ca2982ec8c09a","465a94d928d69e69","36f3834ae2686668","5e7bd82e2981d714","d29b05dcf98d0f6b","0fb1a5a5a8c63a13","547240e8d3d3e745","ff842edfb2943397","4968f0df6ad8e1bf","2b25fa62a286121c","1b0e5b236b5566eb","0d71900f263c981c","7f6bed2b47a33c31","a87d07ac23de6154","11ae6a4166282de0","a149151e4afa9f68","fcf67abc15aca449","568e02b0bdd39153","f703ea1b504f9461","aa3bbaa2fc4abb2d","2f65001685d2cd41","ba581cdc2afa59ed","e97af7593d2ee1e6","079e8b40609d8697","397957db9166b23f","14bb8fd7008395be","bcce78a79a585407","b524e01606b4aff3","cee160a43ef2c71e","299fde38d605f7af","2f90b6b0f49e890b","652cb66a31ddb9dc","4a74ffc455e0e268","d75921517ecaac89","b32ef04e0677ac9e","a230dc53a08dae85","e7f3f39755b5f5a6","e27448badde3f390","5af0d8536607a46b","929b8956f5ad0764","766a9e5a11a92312","dc3829fbd53346da","b1f0dca79d3c224b","772ddb4cb5401ac9","3296ea1374b61316","4fdb2c6b069635fd","e712906cc621e56d","476b3e2cf2e9cd14","907e8f77e54b0e61","a396a4c1b84217a5","06147cc39591fa70","d3f475221362e4ba","ce0086ceaef21b85","67650bbe4439d730","ecf07ce8341d6b99","0775bac959314095","4ca6a554757da64c","9bc7543cd42da495","e4be787b13b28775","217ce2f0d89c6ad4","747311f90d5a4595","ab6079ae050c5374","a51f3c0dd15239a8","5f154ba24e06b097","03163bf2900a7200","f8ee4a1129af8a69","5e93059e63f3d67a","990d9fc27dfe55d9","21bb33f0ca64a2bf","2348465e9cb2b6fa","5475ab6a4c112dfc","5a122a5e1bca8708","331eb29703c0e125","5c0ef0908e1198d7","12215acb0d8ea723","bd966f2e2b3df3d9","94fe3ab2a3613003","88c1320a747f18fe","ec5335841da73f33","23f8810a17533e56","5ae34c89701b4820","d033480d5f97bfdf","5e27ee210f54af08","c8c2b6be5526e10e","d84c2cce3a2e3267","64a359895cdff338","15e97b64d9a54efb","fe3fcf6d2ec89296","457e5226af7e46f4","d3a78ed0a39d25ae","dfd5ce1c85f94c24","75d1d0353013b1d1","a6700efc052ae88e","444e85ca0313e6f0","2ca50cf9241ec851","12877b1c3ef8a1ce","c277a1cafba74c7b","65900c69fa498a8b","1caa0f5c119ed45a","1dfe2b3ac224a20f","e8869206423f7589","62f3a0df8704053c","01b4c3cb60a7afc6","825c158b9910eca5","eed7c0de5091de8d","bbc23b534debe679","ae2c9395d5dedfbc","a46c4e7a981053a7","adbb4d74454abede","37d1702f207bbb03","e8d8651529496d98","b848d027d88b3c4a","148d9d7d491d3dc3","1e08751839efcfe0","92fc0c7719c6c946","b6aaba6142210dbf","38697e9fa3b0df21"]);
+function sha256(ascii){
+  function rr(v,a){return (v>>>a)|(v<<(32-a))}
+  var mp=Math.pow,mw=mp(2,32),i,j,result='',words=[],abl=ascii.length*8;
+  var hash=sha256.h=sha256.h||[],k=sha256.k=sha256.k||[],pc=k.length,ic={};
+  for(var c=2;pc<64;c++){ if(!ic[c]){ for(i=0;i<313;i+=c) ic[i]=c; hash[pc]=(mp(c,.5)*mw)|0; k[pc++]=(mp(c,1/3)*mw)|0; } }
+  ascii+='\x80'; while(ascii.length%64-56) ascii+='\x00';
+  for(i=0;i<ascii.length;i++){ j=ascii.charCodeAt(i); words[i>>2]|=j<<((3-i)%4)*8; }
+  words[words.length]=((abl/mw)|0); words[words.length]=abl;
+  for(j=0;j<words.length;){
+    var w=words.slice(j,j+=16), oldHash=hash; hash=hash.slice(0,8);
+    for(i=0;i<64;i++){
+      var w15=w[i-15],w2=w[i-2],a=hash[0],e=hash[4];
+      var t1=hash[7]+(rr(e,6)^rr(e,11)^rr(e,25))+((e&hash[5])^((~e)&hash[6]))+k[i]+(w[i]=(i<16)?w[i]:(w[i-16]+(rr(w15,7)^rr(w15,18)^(w15>>>3))+w[i-7]+(rr(w2,17)^rr(w2,19)^(w2>>>10)))|0);
+      var t2=(rr(a,2)^rr(a,13)^rr(a,22))+((a&hash[1])^(a&hash[2])^(hash[1]&hash[2]));
+      hash=[(t1+t2)|0].concat(hash); hash[4]=(hash[4]+t1)|0;
+    }
+    for(i=0;i<8;i++) hash[i]=(hash[i]+oldHash[i])|0;
+  }
+  for(i=0;i<8;i++) for(j=3;j+1;j--){ var b=(hash[i]>>(j*8))&255; result+=((b<16)?0:'')+b.toString(16); }
+  return result;
+}
+const keyHash=k=>sha256(KEY_SALT+k).slice(0,16);
+function normKey(s){
+  let n=String(s).toUpperCase().replace(/[^A-Z0-9]/g,'');
+  if(n.length===17&&n.startsWith('ARISE')) n=n.slice(5);
+  return n;
+}
+let kFails=0, kLock=0;
+function tryKey(){
+  if(Date.now()<kLock){ $('kerr').textContent='چەند چرکەیەک چاوەڕێ بکە...'; return }
+  const n=normKey($('kin').value), h=n.length===12?keyHash(n):'';
+  if(h && KEY_HASHES.has(h)){
+    try{localStorage.setItem('arise_key',h)}catch(e){}
+    $('kerr').textContent=''; document.body.classList.remove('nokey');
+  }else{
+    kFails++; if(kFails>=5){ kLock=Date.now()+10000; kFails=0; }
+    $('kerr').textContent='کلیلەکە هەڵەیە، دووبارە هەوڵبدەرەوە';
+    const c=$('kin'); c.classList.remove('shake'); void c.offsetWidth; c.classList.add('shake');
+  }
+}
+$('kgo').addEventListener('click',tryKey);
+$('kin').addEventListener('keydown',e=>{if(e.key==='Enter')tryKey()});
+$('kin').addEventListener('input',e=>{e.target.value=e.target.value.toUpperCase()});
+try{ if(KEY_HASHES.has(localStorage.getItem('arise_key'))) document.body.classList.remove('nokey'); }catch(e){}
+
+const GATE_KEY='arise_joined', joined={tg:false,dc:false};
+function unlock(){document.body.classList.remove('locked')}
+try{ if(localStorage.getItem(GATE_KEY)==='1') unlock(); }catch(e){}
+[['j-tg','tg'],['j-dc','dc']].forEach(([id,k])=>{
+  $(id).addEventListener('click',()=>{
+    joined[k]=true; $(id).classList.add('done');
+    const n=(joined.tg?1:0)+(joined.dc?1:0);
+    $('prog').textContent=n; $('b1').classList.toggle('on',n>=1); $('b2').classList.toggle('on',n>=2);
+    $('cont').disabled=n<2;
+  });
+});
+$('cont').addEventListener('click',()=>{
+  try{localStorage.setItem(GATE_KEY,'1')}catch(e){}
+  unlock();
+});
+
+$('file').addEventListener('change',e=>openFile(e.target.files[0]));
+const drop=$('drop');
+['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over')}));
+['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('over')}));
+drop.addEventListener('drop',e=>openFile(e.dataTransfer.files[0]));
+$('go').onclick=()=>{search();$('q').blur()};
+$('q').addEventListener('keydown',e=>{if(e.key==='Enter'){search();$('q').blur()}});
+let tm; $('q').addEventListener('input',()=>{clearTimeout(tm);tm=setTimeout(search,350)});
+$('tbl').onchange=e=>pickTable(e.target.value);
+$('col').onchange=search;
+$('theme').onclick=()=>{
+  const r=document.documentElement;
+  const dark = r.dataset.theme ? r.dataset.theme==='dark' : !matchMedia('(prefers-color-scheme: light)').matches;
+  r.dataset.theme = dark?'light':'dark';
+};
+</script>
+</body>
+</html>
